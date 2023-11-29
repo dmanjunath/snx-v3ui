@@ -86,8 +86,7 @@ commands:
       - run:
           name: 'Install dependencies'
           command: |
-            # dependencies for armada-cli
-            sudo apt-get update && sudo apt-get install -y libusb-1.0 libudev-dev libsecret-1-dev
+            # sudo apt-get update && sudo apt-get install -y libusb-1.0 libudev-dev libsecret-1-dev
 
             # install gh official cli, the github-cli circleci orb is not up to date
             # taken from https://github.com/cli/cli/blob/trunk/docs/install_linux.md
@@ -98,16 +97,15 @@ commands:
             && sudo apt update \
             && sudo apt install gh -y
 
-            # check that armada-cli runs
-            npx armada-cli --version
+            yarn armada:version
 
       - run:
           name: 'Build Armada bundle'
           command: |
-            BUNDLE_FILENAME=$(npx armada-cli bundle create armada-bundle-liquidity "<< parameters.source-dir >>")
+            BUNDLE_FILENAME=$(yarn armada:bundle armada-bundle-liquidity "<< parameters.source-dir >>")
             echo 'export BUNDLE_FILENAME='${BUNDLE_FILENAME} >> $BASH_ENV
 
-            CHECKSUM=$(npx armada-cli bundle checksum $BUNDLE_FILENAME)
+            CHECKSUM=$(yarn armada:checksum $BUNDLE_FILENAME)
             echo 'export CHECKSUM='${CHECKSUM} >> $BASH_ENV
 
             CHECKSUM_FILENAME="checksum_SHA256SUM"
@@ -120,7 +118,7 @@ commands:
       - run:
           name: 'Publish Armada Release to Github with assets'
           command: |
-            gh release create -R $CIRCLE_REPOSITORY_URL --generate-notes --title "${RELEASE_NAME}" ${RELEASE_NAME}
+            gh release create -R $CIRCLE_REPOSITORY_URL --notes "Full Changelog: ${CIRCLE_REPOSITORY_URL}/commits/${RELEASE_NAME}" --title "${RELEASE_NAME}" ${RELEASE_NAME}
             gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${BUNDLE_FILENAME}
             gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${CHECKSUM_FILENAME}
 
@@ -128,7 +126,7 @@ commands:
           name: 'Push to Armada'
           command: |
             BUNDLE_URL=$(gh release view -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${BUNDLE_FILENAME}\") | .url")
-            npx armada-cli project publish $ARMADA_PROJECT_ID $BUNDLE_URL $CHECKSUM --key=$ARMADA_PRIVATE_KEY
+            yarn armada:publish $ARMADA_PROJECT_ID $BUNDLE_URL $CHECKSUM --key=$ARMADA_PRIVATE_KEY
 
 jobs:
   checks:

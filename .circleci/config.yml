@@ -86,6 +86,7 @@ commands:
       - run:
           name: 'Install dependencies'
           command: |
+            # base circleci image is missing these dependencies
             sudo apt-get update && sudo apt-get install -y libusb-1.0 libudev-dev libsecret-1-dev
 
             # install gh official cli, the github-cli circleci orb is not up to date
@@ -97,7 +98,7 @@ commands:
             && sudo apt update \
             && sudo apt install gh -y
 
-            yarn armada:version
+            yarn armada --version
 
       - run:
           name: 'Build Armada bundle'
@@ -118,7 +119,7 @@ commands:
       - run:
           name: 'Publish Armada Release to Github with assets'
           command: |
-            gh release create -R $CIRCLE_REPOSITORY_URL --notes "Full Changelog: ${CIRCLE_REPOSITORY_URL}/commits/${RELEASE_NAME}" --title "${RELEASE_NAME}" ${RELEASE_NAME}
+            gh release create -R $CIRCLE_REPOSITORY_URL --generate-notes --title "${RELEASE_NAME}" ${RELEASE_NAME}
             gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${BUNDLE_FILENAME}
             gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${CHECKSUM_FILENAME}
 
@@ -308,30 +309,30 @@ workflows:
         - equal: ['skip-tests', << pipeline.git.branch >>]
 
     jobs:
-      # - checks
-      # - typecheck
-      # - tests
-      # - liquidity-cy
-      # - liquidity-e2e:
-      #     chain: optimism-mainnet
-      #     name: liquidity-e2e-optimism-mainnet
-      # - liquidity-e2e:
-      #     chain: optimism-goerli
-      #     name: liquidity-e2e-optimism-goerli
-      # - liquidity-e2e:
-      #     chain: goerli
-      #     name: liquidity-e2e-goerli
-      # - combine-coverage:
-      #     requires: [tests, liquidity-cy, liquidity-e2e-optimism-mainnet]
+      - checks
+      - typecheck
+      - tests
+      - liquidity-cy
+      - liquidity-e2e:
+          chain: optimism-mainnet
+          name: liquidity-e2e-optimism-mainnet
+      - liquidity-e2e:
+          chain: optimism-goerli
+          name: liquidity-e2e-optimism-goerli
+      - liquidity-e2e:
+          chain: goerli
+          name: liquidity-e2e-goerli
+      - combine-coverage:
+          requires: [tests, liquidity-cy, liquidity-e2e-optimism-mainnet]
       - liquidity-armada:
-          # requires:
-            # - checks
-            # - typecheck
-            # - tests
-            # - liquidity-cy
-            # - liquidity-e2e-optimism-mainnet
-            # - liquidity-e2e-optimism-goerli
-            # - liquidity-e2e-goerli
+          requires:
+            - checks
+            - typecheck
+            - tests
+            - liquidity-cy
+            - liquidity-e2e-optimism-mainnet
+            - liquidity-e2e-optimism-goerli
+            - liquidity-e2e-goerli
           filters:
             branches:
               only:
@@ -339,18 +340,18 @@ workflows:
                 - master
                 - ipfs-deploy
                 - dm-code-review
-      # - liquidity-ipfs:
-      #     requires:
-      #       - checks
-      #       - typecheck
-      #       - tests
-      #       - liquidity-cy
-      #       - liquidity-e2e-optimism-mainnet
-      #       - liquidity-e2e-optimism-goerli
-      #       - liquidity-e2e-goerli
-      #     filters:
-      #       branches:
-      #         only:
-      #           - release
-      #           - master
-      #           - ipfs-deploy
+      - liquidity-ipfs:
+          requires:
+            - checks
+            - typecheck
+            - tests
+            - liquidity-cy
+            - liquidity-e2e-optimism-mainnet
+            - liquidity-e2e-optimism-goerli
+            - liquidity-e2e-goerli
+          filters:
+            branches:
+              only:
+                - release
+                - master
+                - ipfs-deploy

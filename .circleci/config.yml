@@ -113,7 +113,7 @@ commands:
             echo $CHECKSUM > $CHECKSUM_FILENAME
             echo 'export CHECKSUM_FILENAME='${CHECKSUM_FILENAME} >> $BASH_ENV
 
-            RELEASE_NAME=release-armada-$(date '+%Y%m%d%s')
+            RELEASE_NAME=release-armada-$(date '+%Y%m%d')
             echo 'export RELEASE_NAME='${RELEASE_NAME} >> $BASH_ENV
 
       - run:

@@ -108,14 +108,14 @@ commands:
             echo 'export RELEASE_NAME='${RELEASE_NAME} >> $BASH_ENV
 
       - store_artifacts:
-          path: ${BUNDLE_FILENAME}
+          path: liquidity/ui/dist/armada-bundle-liquidity.tgz
             
 
       - run:
           name: 'Push to Armada'
           command: |
-            BUNDLE_URL=$(gh release view -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${BUNDLE_FILENAME}\") | .url")
-            yarn armada:publish $ARMADA_PROJECT_ID $BUNDLE_URL $CHECKSUM --key=$ARMADA_PRIVATE_KEY
+            # BUNDLE_URL=$(gh release view -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} --json assets --jq ".assets[] | select(.name == \"${BUNDLE_FILENAME}\") | .url")
+            # yarn armada:publish $ARMADA_PROJECT_ID $BUNDLE_URL $CHECKSUM --key=$ARMADA_PRIVATE_KEY
 
 jobs:
   checks:

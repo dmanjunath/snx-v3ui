@@ -107,7 +107,8 @@ commands:
       - run:
           name: 'Push to Armada'
           command: |
-            BUNDLE_URL=https://output.circle-artifacts.com/output/job/$CIRCLE_JOB/artifacts/0/armada-bundle-liquidity.tgz
+            # https://support.circleci.com/hc/en-us/articles/5034956515355-How-to-Programmatically-Construct-the-URLs-for-Artifacts
+            BUNDLE_URL=https://output.circle-artifacts.com/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/${CIRCLE_NODE_INDEX}/armada-bundle-liquidity.tgz
             yarn armada:publish $ARMADA_PROJECT_ID $BUNDLE_URL $CHECKSUM --key=$ARMADA_PRIVATE_KEY
 
 jobs:

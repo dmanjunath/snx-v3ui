@@ -320,7 +320,6 @@ workflows:
                 - release
                 - master
                 - ipfs-deploy
-                - dm-store-build-artifacts
       - liquidity-ipfs:
           requires:
             - checks

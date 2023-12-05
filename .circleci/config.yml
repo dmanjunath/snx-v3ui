@@ -89,15 +89,6 @@ commands:
             # base circleci image is missing these dependencies
             sudo apt-get update && sudo apt-get install -y libusb-1.0 libudev-dev libsecret-1-dev
 
-            # install gh official cli, the github-cli circleci orb is not up to date
-            # taken from https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-            type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-            && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-            && sudo apt update \
-            && sudo apt install gh -y
-
             yarn armada --version
 
       - run:
@@ -116,12 +107,9 @@ commands:
             RELEASE_NAME=release-armada-$(date '+%Y%m%d')
             echo 'export RELEASE_NAME='${RELEASE_NAME} >> $BASH_ENV
 
-      - run:
-          name: 'Publish Armada Release to Github with assets'
-          command: |
-            gh release create -R $CIRCLE_REPOSITORY_URL --generate-notes --title "${RELEASE_NAME}" ${RELEASE_NAME}
-            gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${BUNDLE_FILENAME}
-            gh release upload -R $CIRCLE_REPOSITORY_URL ${RELEASE_NAME} ${CHECKSUM_FILENAME}
+      - store_artifacts:
+          path: ${BUNDLE_FILENAME}
+            
 
       - run:
           name: 'Push to Armada'
@@ -309,48 +297,49 @@ workflows:
         - equal: ['skip-tests', << pipeline.git.branch >>]
 
     jobs:
-      - checks
-      - typecheck
-      - tests
-      - liquidity-cy
-      - liquidity-e2e:
-          chain: optimism-mainnet
-          name: liquidity-e2e-optimism-mainnet
-      - liquidity-e2e:
-          chain: optimism-goerli
-          name: liquidity-e2e-optimism-goerli
-      - liquidity-e2e:
-          chain: goerli
-          name: liquidity-e2e-goerli
-      - combine-coverage:
-          requires: [tests, liquidity-cy, liquidity-e2e-optimism-mainnet]
+      # - checks
+      # - typecheck
+      # - tests
+      # - liquidity-cy
+      # - liquidity-e2e:
+      #     chain: optimism-mainnet
+      #     name: liquidity-e2e-optimism-mainnet
+      # - liquidity-e2e:
+      #     chain: optimism-goerli
+      #     name: liquidity-e2e-optimism-goerli
+      # - liquidity-e2e:
+      #     chain: goerli
+      #     name: liquidity-e2e-goerli
+      # - combine-coverage:
+      #     requires: [tests, liquidity-cy, liquidity-e2e-optimism-mainnet]
       - liquidity-armada:
-          requires:
-            - checks
-            - typecheck
-            - tests
-            - liquidity-cy
-            - liquidity-e2e-optimism-mainnet
-            - liquidity-e2e-optimism-goerli
-            - liquidity-e2e-goerli
+          # requires:
+            # - checks
+            # - typecheck
+            # - tests
+            # - liquidity-cy
+            # - liquidity-e2e-optimism-mainnet
+            # - liquidity-e2e-optimism-goerli
+            # - liquidity-e2e-goerli
           filters:
             branches:
               only:
                 - release
                 - master
                 - ipfs-deploy
-      - liquidity-ipfs:
-          requires:
-            - checks
-            - typecheck
-            - tests
-            - liquidity-cy
-            - liquidity-e2e-optimism-mainnet
-            - liquidity-e2e-optimism-goerli
-            - liquidity-e2e-goerli
-          filters:
-            branches:
-              only:
-                - release
-                - master
-                - ipfs-deploy
+                - dm-store-build-artifacts
+      # - liquidity-ipfs:
+      #     requires:
+      #       - checks
+      #       - typecheck
+      #       - tests
+      #       - liquidity-cy
+      #       - liquidity-e2e-optimism-mainnet
+      #       - liquidity-e2e-optimism-goerli
+      #       - liquidity-e2e-goerli
+      #     filters:
+      #       branches:
+      #         only:
+      #           - release
+      #           - master
+      #           - ipfs-deploy

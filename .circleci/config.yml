@@ -108,7 +108,7 @@ commands:
             echo 'export RELEASE_NAME='${RELEASE_NAME} >> $BASH_ENV
 
       - store_artifacts:
-          path: 'liquidity/ui/dist/armada-bundle-liquidity.tgz'
+          path: 'armada-bundle-liquidity.tgz'
           destination: 'armada-bundle-liquidity.tgz'
             
 

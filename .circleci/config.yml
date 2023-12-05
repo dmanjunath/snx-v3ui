@@ -109,6 +109,7 @@ commands:
 
       - store_artifacts:
           path: 'liquidity/ui/dist/armada-bundle-liquidity.tgz'
+          destination: 'armada-bundle-liquidity.tgz'
             
 
       - run:

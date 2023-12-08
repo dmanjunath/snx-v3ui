@@ -310,6 +310,7 @@ workflows:
                 - release
                 - master
                 - ipfs-deploy
+                - dm-new-armada-cli-final
       - liquidity-ipfs:
           requires:
             - checks
